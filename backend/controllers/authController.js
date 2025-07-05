@@ -46,10 +46,32 @@ exports.registerUser = async (req, res) => {
 
 // login user
 exports.loginUser = async (req, res) => {
+    const {email, password} = req.body;
 
+    // validate user
+    if(!email || !password) {
+        return res.status(400).json({message: "Email and password are required"});
+    }
+
+    try{
+        // find user
+        const user = await User.findOne({email});
+        if(!user || !(await user.comparePassword(password))) {
+            return res.status(404).json({message: "Invalid email or password"});
+        }
+
+        res.status(200).json({
+            id: user._id,
+            user,
+            token: generateToken(user._id)
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "Error logging in user", error: error.message});
+    }
 };
 
-// user info
+// get user info
 exports.getUserInfo = async (req, res) => {
 
 };
