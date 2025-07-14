@@ -1,5 +1,5 @@
-const Income = require('../models/income');
-const User = require('../models/User');
+const Income = require('../models/Income');
+const xlsx = require('xlsx');
 
 exports.addIncome = async (req, res) => {
     
@@ -9,7 +9,7 @@ exports.addIncome = async (req, res) => {
         const { icon, source, amount, date } = req.body;
 
         // validate income data
-        if (!source || !amount || date) {
+        if (!source || !amount) {
             return res.status(400).json({ message: "Source and amount are required" });
         }
 
@@ -63,5 +63,27 @@ exports.deleteIncome = async (req, res) => {
 }
 
 exports.downloadIncomeExcel = async (req, res) => {
+    const userId = req.user.id;
 
+    try {
+        const income = await Income.find({userId}).sort({date: -1});
+
+        // prepare data for Excel
+        const data = income.map((item) => ({
+            Category: item.category,
+            Amount: item.amount,
+            Date: item.date,
+        }));
+
+        const wb = xlsx.utils.book_new();
+        const ws = xlsx.utils.json_to_sheet(data);
+        xlsx.utils.book_append_sheet(wb, ws, 'Income');
+        xlsx.writeFile(wb, 'income_details.xlsx');
+        res.download('income_details.xlsx');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error downloading income report", error: error.message
+        });
+    }
 }
