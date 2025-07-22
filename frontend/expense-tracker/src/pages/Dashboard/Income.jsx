@@ -39,7 +39,14 @@ const Income = () => {
 
 
   // handle add income
-  const handleAddIncome = async (income) => {}
+  const handleAddIncome = async (income) => {
+    const {source, amount, date, icon} = income;
+
+    // validation checks
+    // if(!source.trim()) {
+    //   toast.error("Source is required.");
+    // }
+  }
 
   // handle delete income
   const handleDeleteIncome = async (id) => {}
